@@ -1,15 +1,18 @@
 const express = require("express");
 const cors = require("cors");
 require('dotenv').config();
-
 require("./config/db");
+
 const authRouter = require("./routes/authRouter");
+const taskRouter = require("./routes/taskRouter");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 app.use("/api/auth",authRouter);
+app.use("/api",taskRouter);
 
 app.get('/',(req,res)=>{
     console.log("/get method accessed")

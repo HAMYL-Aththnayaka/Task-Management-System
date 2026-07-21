@@ -1,9 +1,8 @@
-const db = require("../config/db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 
-const { findUserByEmail } = require("../models/userModels");
+const { findUserByEmail } = require("../models/userModel");
 
 
 const login = async (req, res) => {
