@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const db = require("./config/db");
 
 const createAdmin = async () => {
+    try {
     const adminPassword = "123456";
     const adminEmail ="admin@test.com";
     const adminName = "admin";
@@ -23,7 +24,10 @@ const createAdmin = async () => {
     }else{
         console.log("Something went Wrong Admin was not created")
     }
-    
+    } catch (err) {
+        console.log(err.message);
+    }
+
     process.exit();
 }
 createAdmin();

@@ -1,4 +1,4 @@
-const { getTasksByUserId, getTaskByTaskId, createTask, updateTask, deleteTask } = require("../models/taskModel");
+const { getTasksByUserId, getTaskByTaskId, createTask, updateTask, deleteTask, getTaskStats, searchTasks } = require("../models/taskModel");
 const validateTask = require("../utils/validateTask");
 
 
@@ -133,12 +133,60 @@ const deleteTasks = async (req, res) => {
         return res.status(200).json({
             message: "Task Removed Successfully"
         })
-    }catch(err){
+    } catch (err) {
         return res.status(500).json({
             message: err.message,
         });
     }
 }
 
+//dashboard 
+const dashboardStats = async (req, res) => {
+    try {
+        const userId = req.user.id;
 
-module.exports = { addTask, fetchTasksByUserId, fetcheTasksByTaskId, updateTasks ,deleteTasks};
+        const result = await getTaskStats(userId);
+        if (!result) {
+            return res.Status(404).json({
+                message: "Stats not Found"
+            })
+        }
+        return res.status(200).json({
+            result
+        })
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message,
+        })
+    }
+}
+
+const searchTaskFilter = async (req, res) => {
+    try {
+        const filter = {
+            title: req.query.title,
+            status: req.query.status,
+            priority: req.query.priority,
+            sort: req.query.sort
+        }
+        if (!filter.title && !filter.status && !filter.priority) {
+            return res.status(400).json({
+                message: "Search paramaeters are needed"
+            })
+        }
+        const userId = req.user.id;
+        const result = await searchTasks(userId, filter);
+
+        return res.status(200).json({
+            tasks: result
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message,
+        })
+    }
+}
+
+
+module.exports = { addTask, fetchTasksByUserId, fetcheTasksByTaskId, updateTasks, deleteTasks, dashboardStats, searchTaskFilter };
