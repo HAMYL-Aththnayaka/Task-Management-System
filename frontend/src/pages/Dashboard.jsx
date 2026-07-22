@@ -11,7 +11,7 @@ const Dashboard = () => {
             try {
                 const result = await api.get("/tasks/dashboard");
                 setStates(result.data.result);
-                console.log(result.data)
+                //console.log(result.data)
 
             } catch (err) {
                 console.log(err.response?.data?.message || err.message);
