@@ -147,7 +147,7 @@ const dashboardStats = async (req, res) => {
 
         const result = await getTaskStats(userId);
         if (!result) {
-            return res.Status(404).json({
+            return res.status(404).json({
                 message: "Stats not Found"
             })
         }
