@@ -24,11 +24,5 @@ api.interceptors.request.use(
     }
 );
 
-
 export default api;
 
-//Email:
-//admin@test.com
-
-//Password:
-//123456
