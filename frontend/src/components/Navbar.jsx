@@ -12,7 +12,7 @@ const Navbar = () => {
         try {
             const result = logout();
 
-            if (logout) {
+            if (result) {
                 toast.success("Logged out successfully");
                 navigate("/")
             }

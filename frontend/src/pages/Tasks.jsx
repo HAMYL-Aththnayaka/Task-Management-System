@@ -10,31 +10,60 @@ const Tasks = () => {
 
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [priorityFilter, setPriorityFilter] = useState("");
     const [sortBy, setSortBy] = useState("");
-
     const navigate = useNavigate();
 
-    useEffect(() => {
 
-        const getTasks = async () => {
-            try {
-                const result = await api.get('/tasks');
-                setTasks(result.data.tasks);
-                //  console.log(result.data.tasks)
-            } catch (err) {
-                const message = err?.response?.data?.message || err.message;
-                console.log(message);
-                toast(message);
+    const getFilteredTasks = async () => {
+        try {
+            const params = new URLSearchParams();
+            if (search) {
+                params.append("title", search);
             }
+
+            if (statusFilter) {
+                params.append("status", statusFilter);
+            }
+
+            if (priorityFilter) {
+                params.append("priority", priorityFilter);
+            }
+
+            if (sortBy) {
+                params.append("sort", sortBy);
+            }
+
+            let result;
+            if (params.toString()) {
+                result = await api.get(`/tasks/search?${params.toString()}`);
+            } else {
+                result = await api.get('/tasks');
+            }
+
+            setTasks(result.data.tasks);
+        } catch (err) {
+            const message = err?.response?.data?.message || err.message;
+            console.log(message);
+            toast(message);
+        }
+    };
+
+
+    useEffect(() => {
+        const loadTasks = async () => {
+            await getFilteredTasks();
             setLoading(false);
         }
-        getTasks();
+        loadTasks();
     }, []);
 
+
+    useEffect(() => {
+        getFilteredTasks();
+    }, [search, statusFilter, priorityFilter, sortBy]);
 
     const deleteHandle = async (id) => {
         try {
@@ -43,59 +72,20 @@ const Tasks = () => {
             if (!confirmDelete) {
                 return;
             }
+
             const result = await api.delete(`/tasks/${id}`);
+
             if (result) {
                 setTasks(tasks.filter(task => task.id !== id));
                 toast.success("item removed");
             }
+
         } catch (err) {
             const message = err.response?.data?.message || err.message;
             console.log(message);
             toast.error(message);
         }
     }
-
-    const getFilteredTasks = () => {
-        let result = [...tasks];
-
-        if (search) {
-            result = result.filter((task) =>
-                task.title.toLowerCase().includes(search.toLowerCase())
-            );
-        }
-
-        if (statusFilter) {
-            result = result.filter(
-                (task) => task.status === statusFilter
-            );
-        }
-
-        if (priorityFilter) {
-            result = result.filter(
-                (task) => task.priority === priorityFilter
-            );
-        }
-
-        if (sortBy === "newest") {
-            result.sort(
-                (a, b) => new Date(b.created_at) - new Date(a.created_at)
-            );
-        }
-
-        if (sortBy === "oldest") {
-            result.sort(
-                (a, b) => new Date(a.created_at) - new Date(b.created_at)
-            );
-        }
-
-        if (sortBy === "dueDate") {
-            result.sort(
-                (a, b) => new Date(a.due_date) - new Date(b.due_date)
-            );
-        }
-
-        return result;
-    };
 
     const handleEdit = (id) => {
         try {
@@ -110,15 +100,11 @@ const Tasks = () => {
         return <h2>Loading the Tasks</h2>
     }
 
-    const filerTask = getFilteredTasks();
-
     return (
         <div>
             <Navbar />
-
             <div className="tasks-page">
                 <h2>My tasks</h2>
-
                 {tasks.length === 0 ? (
                     <p>You have 0 tasks</p>
                 ) : (
@@ -130,7 +116,6 @@ const Tasks = () => {
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
-
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -160,10 +145,13 @@ const Tasks = () => {
                                 <option value="oldest">Oldest Created</option>
                                 <option value="dueDate">Due Date</option>
                             </select>
+
                         </div>
 
-                        {filerTask.map((task) => (
+                        {tasks.map((task) => (
+
                             <div className="task-card" key={task.id}>
+
                                 <h3>{task.title}</h3>
 
                                 <div className="task-info">
@@ -174,6 +162,7 @@ const Tasks = () => {
                                 </div>
 
                                 <div className="task-buttons">
+
                                     <button
                                         className="edit-btn"
                                         onClick={() => handleEdit(task.id)}
